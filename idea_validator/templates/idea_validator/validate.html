@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}Validate Idea | Startup Idea Validator{% endblock %}
+
+{% block content %}
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="loader"></div>
+    <div id="loading-status-text" class="loading-text">Analyzing startup feasibility...</div>
+    <div class="loading-sub">Leveraging Gemini cognitive engines to construct your reports. Please wait...</div>
+</div>
+
+<div style="max-width: 700px; margin: 0 auto;">
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="margin-bottom: 1.5rem; padding: 0.5rem 1rem; font-size: 0.9rem;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
+    
+    <div class="glass-panel">
+        <h2 style="font-size: 2rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary);"></i> Idea Validation Engine
+        </h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Specify your core startup inputs. Gemini will generate a full suite of business metrics, competitor maps, and risk diagnostics.</p>
+        
+        <form method="post" id="validator-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="glass-panel" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: #f87171; padding: 1rem; margin-bottom: 1.5rem; border-radius: 8px;">
+                    {{ form.non_field_errors|first }}
+                </div>
+            {% endif %}
+            
+            <!-- Startup Idea -->
+            <div class="form-group">
+                <label for="{{ form.startup_idea.id_for_label }}">Startup Idea</label>
+                {{ form.startup_idea }}
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Explain what your business does, the primary problem it solves, and its core features.</span>
+                {% if form.startup_idea.errors %}
+                    <span style="color: #f87171; font-size: 0.85rem;">{{ form.startup_idea.errors|first }}</span>
+                {% endif %}
+            </div>
+            
+            <!-- Target Audience -->
+            <div class="form-group">
+                <label for="{{ form.target_audience.id_for_label }}">Target Audience</label>
+                {{ form.target_audience }}
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Describe your ideal customer (demographics, habits, behaviors, or business size).</span>
+                {% if form.target_audience.errors %}
+                    <span style="color: #f87171; font-size: 0.85rem;">{{ form.target_audience.errors|first }}</span>
+                {% endif %}
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <!-- Budget -->
+                <div class="form-group">
+                    <label for="{{ form.budget.id_for_label }}">Starting Budget</label>
+                    {{ form.budget }}
+                    {% if form.budget.errors %}
+                        <span style="color: #f87171; font-size: 0.85rem;">{{ form.budget.errors|first }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Industry -->
+                <div class="form-group">
+                    <label for="{{ form.industry.id_for_label }}">Industry / Domain</label>
+                    {{ form.industry }}
+                    {% if form.industry.errors %}
+                        <span style="color: #f87171; font-size: 0.85rem;">{{ form.industry.errors|first }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Custom Industry (hidden by default, toggled by JS) -->
+            <div class="form-group" id="custom-industry-group">
+                {{ form.custom_industry }}
+                {% if form.custom_industry.errors %}
+                    <span style="color: #f87171; font-size: 0.85rem;">{{ form.custom_industry.errors|first }}</span>
+                {% endif %}
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.9rem 1.5rem; font-size: 1.1rem;">
+                    <i class="fa-solid fa-gears"></i> Analyze Startup Idea
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

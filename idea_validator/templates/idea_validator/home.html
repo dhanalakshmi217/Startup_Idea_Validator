@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Startup Idea Validator{% endblock %}
+
+{% block content %}
+<div class="dashboard-hero">
+    <h1>Validate Your <span class="gradient-text">Next Venture</span></h1>
+    <p>Submit your startup parameters and leverage Gemini intelligence to evaluate market potential, competitor strategies, and cost viability.</p>
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'validate_idea' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 0.9rem 2.2rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Validate New Idea
+        </a>
+    </div>
+</div>
+
+<!-- Aggregated Metrics -->
+<div class="stats-grid">
+    <div class="glass-panel stat-card">
+        <div class="stat-icon" style="color: #6366f1; background: rgba(99, 102, 241, 0.15);">
+            <i class="fa-solid fa-lightbulb"></i>
+        </div>
+        <div>
+            <div class="stat-value">{{ total_count }}</div>
+            <div class="stat-label">Ideas Validated</div>
+        </div>
+    </div>
+    
+    <div class="glass-panel stat-card">
+        <div class="stat-icon" style="color: #14b8a6; background: rgba(20, 184, 166, 0.15);">
+            <i class="fa-solid fa-industry"></i>
+        </div>
+        <div>
+            <div class="stat-value" style="font-size: 1.5rem; line-height: 2.25rem;">{{ top_industry }}</div>
+            <div class="stat-label">Top Industry</div>
+        </div>
+    </div>
+    
+    <div class="glass-panel stat-card">
+        <div class="stat-icon" style="color: #10b981; background: rgba(16, 185, 129, 0.15);">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+            <div class="stat-value" style="font-size: 1.5rem; line-height: 2.25rem;">Active</div>
+            <div class="stat-label">Engine Status</div>
+        </div>
+    </div>
+</div>
+
+<!-- Past Reports Section -->
+<h2 style="margin-bottom: 1.5rem; font-family: var(--font-heading); display: flex; align-items: center; gap: 0.75rem;">
+    <i class="fa-solid fa-folder-open" style="color: var(--primary);"></i> Saved Reports
+</h2>
+
+{% if reports %}
+    <div class="report-grid">
+        {% for report in reports %}
+            <div class="glass-panel report-card">
+                <div>
+                    <div class="report-card-header">
+                        <span class="industry-badge">{{ report.industry }}</span>
+                        {% if "Demo" in report.report_data.generation_mode %}
+                            <span class="demo-badge"><i class="fa-solid fa-flask"></i> Demo Mode</span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; color: #ffffff; line-height: 1.4;">
+                        {{ report.startup_idea|truncatechars:70 }}
+                    </h3>
+                    
+                    <div class="report-card-body">
+                        <p><strong>Target Audience:</strong> {{ report.target_audience|truncatechars:100 }}</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-wallet"></i> Budget: <strong>{{ report.budget }}</strong>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="report-card-footer">
+                    <span class="date-text"><i class="fa-regular fa-clock"></i> {{ report.created_at|date:"M d, Y" }}</span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <a href="{% url 'report_detail' report.pk %}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;">
+                            View <i class="fa-solid fa-arrow-right-long" style="font-size: 0.75rem;"></i>
+                        </a>
+                        <form action="{% url 'delete_report' report.pk %}" method="post" onsubmit="return confirm('Are you sure you want to delete this report?');" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger" style="padding: 0.4rem 0.6rem; font-size: 0.85rem;" title="Delete report">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="glass-panel" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 3.5rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-receipt"></i>
+        </div>
+        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">No Reports Yet</h3>
+        <p style="color: var(--text-muted); max-width: 450px; margin: 0 auto 2rem;">Create your first validation report using VentureSpark. It takes less than 30 seconds to generate a full analysis.</p>
+        <a href="{% url 'validate_idea' %}" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> Validate Your First Idea
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

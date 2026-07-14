@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Startup Idea Validator{% endblock %}</title>
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Custom Vanilla Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+    <!-- Header Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'dashboard' %}" class="logo">
+                <i class="fa-solid fa-rocket"></i> VentureSpark
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="{% url 'validate_idea' %}" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem; margin-left: 1rem;">
+                    <i class="fa-solid fa-plus"></i> New Validation
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Body -->
+    <main class="container">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 VentureSpark. Powered by Gemini API & Django. Crafted with premium design diagnostics.</p>
+    </footer>
+
+    <!-- Main Interactivity JavaScript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

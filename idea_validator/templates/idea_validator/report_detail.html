@@ -1,0 +1,477 @@
+{% extends 'base.html' %}
+
+{% block title %}Report: {{ report.startup_idea|truncatechars:35 }} | Startup Idea Validator{% endblock %}
+
+{% block content %}
+<!-- Report Header Bar -->
+<div class="glass-panel" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <span class="industry-badge" style="font-size: 0.9rem; padding: 0.35rem 1rem;">{{ report.industry }}</span>
+            {% if "Demo" in report.report_data.generation_mode %}
+                <span class="demo-badge" style="font-size: 0.85rem; padding: 0.35rem 1rem;"><i class="fa-solid fa-flask"></i> {{ report.report_data.generation_mode }}</span>
+            {% else %}
+                <span class="demo-badge" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.35); color: #34d399; font-size: 0.85rem; padding: 0.35rem 1rem;"><i class="fa-solid fa-brain"></i> AI Validated</span>
+            {% endif %}
+        </div>
+        <h1 style="font-size: 2.25rem; font-family: var(--font-heading); margin-bottom: 0.5rem; font-weight: 800; line-height: 1.3;">
+            {{ report.startup_idea }}
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+            <i class="fa-solid fa-users"></i> Target Audience: <strong>{{ report.target_audience }}</strong> &nbsp;|&nbsp; 
+            <i class="fa-solid fa-wallet"></i> Budget: <strong>{{ report.budget }}</strong>
+        </p>
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Dashboard
+        </a>
+        <form action="{% url 'delete_report' report.pk %}" method="post" onsubmit="return confirm('Are you sure you want to delete this report?');" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fa-regular fa-trash-can"></i> Delete
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Main Report Workspace -->
+<div class="report-layout">
+    
+    <!-- Sidebar Navigation Tabs -->
+    <div class="report-sidebar">
+        <button class="tab-btn active" data-tab="tab-swot">
+            <i class="fa-solid fa-square-poll-vertical"></i> SWOT Analysis
+        </button>
+        <button class="tab-btn" data-tab="tab-competitors">
+            <i class="fa-solid fa-users-viewfinder"></i> Competitors
+        </button>
+        <button class="tab-btn" data-tab="tab-business-model">
+            <i class="fa-solid fa-network-wired"></i> Business Model
+        </button>
+        <button class="tab-btn" data-tab="tab-marketing">
+            <i class="fa-solid fa-bullhorn"></i> Marketing Plan
+        </button>
+        <button class="tab-btn" data-tab="tab-revenue">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Revenue Model
+        </button>
+        <button class="tab-btn" data-tab="tab-risks">
+            <i class="fa-solid fa-triangle-exclamation"></i> Risks & Mitigation
+        </button>
+        <button class="tab-btn" data-tab="tab-improvements">
+            <i class="fa-solid fa-circle-check"></i> Action Checklist
+        </button>
+        <button class="tab-btn" data-tab="tab-pitch">
+            <i class="fa-solid fa-presentation-screen"></i> Investor Pitch
+        </button>
+    </div>
+    
+    <!-- Tab Panels Container -->
+    <div class="report-panels">
+        
+        <!-- Tab 1: SWOT -->
+        <div id="tab-swot" class="tab-content">
+            <div class="glass-panel">
+                <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-square-poll-vertical"></i> SWOT Matrix</h2>
+                <div class="swot-grid">
+                    <div class="swot-card swot-strengths">
+                        <h3><i class="fa-solid fa-circle-plus"></i> Strengths</h3>
+                        <ul>
+                            {% for strength in report.swot.strengths %}
+                                <li>{{ strength }}</li>
+                            {% empty %}
+                                <li>No strengths specified.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-weaknesses">
+                        <h3><i class="fa-solid fa-circle-minus"></i> Weaknesses</h3>
+                        <ul>
+                            {% for weakness in report.swot.weaknesses %}
+                                <li>{{ weakness }}</li>
+                            {% empty %}
+                                <li>No weaknesses specified.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-opportunities">
+                        <h3><i class="fa-solid fa-arrow-trend-up"></i> Opportunities</h3>
+                        <ul>
+                            {% for opportunity in report.swot.opportunities %}
+                                <li>{{ opportunity }}</li>
+                            {% empty %}
+                                <li>No opportunities specified.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-threats">
+                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Threats</h3>
+                        <ul>
+                            {% for threat in report.swot.threats %}
+                                <li>{{ threat }}</li>
+                            {% empty %}
+                                <li>No threats specified.</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 2: Competitors -->
+        <div id="tab-competitors" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2 style="margin-bottom: 0.5rem;"><i class="fa-solid fa-users-viewfinder"></i> Competitor Landscape</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Key players in this sector and how you match up against them.</p>
+                
+                <div class="competitor-table-container">
+                    <table class="competitor-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">Competitor</th>
+                                <th style="width: 15%;">Market Share</th>
+                                <th style="width: 30%;">Strengths</th>
+                                <th style="width: 30%;">Weaknesses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comp in report.competitors.competitors %}
+                                <tr>
+                                    <td><strong>{{ comp.name }}</strong></td>
+                                    <td><span class="industry-badge" style="background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.25); color: var(--teal);">{{ comp.market_share }}</span></td>
+                                    <td>
+                                        <ul>
+                                            {% for strg in comp.strengths %}
+                                                <li>{{ strg }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            {% for weak in comp.weaknesses %}
+                                                <li>{{ weak }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-muted);">No competitors analyzed.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="glass-panel" style="background: rgba(99, 102, 241, 0.05); border-color: rgba(99, 102, 241, 0.25);">
+                    <h3 style="font-size: 1.15rem; color: #ffffff; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-chess-knight" style="color: var(--primary);"></i> Differentiation Strategy
+                    </h3>
+                    <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.6;">
+                        {{ report.competitors.differentiation_strategy }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 3: Business Model -->
+        <div id="tab-business-model" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-network-wired"></i> Business Model Canvas</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Visual architecture of how your startup creates, delivers, and captures value.</p>
+                
+                <!-- Custom layout of the canvas -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: var(--teal); font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-hand-holding-heart"></i> Value Proposition
+                        </h3>
+                        <p style="line-height: 1.6; font-size: 0.95rem; color: #ffffff;">{{ report.business_model.value_proposition }}</p>
+                    </div>
+                    
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-users"></i> Customer Segments
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+                            {% for seg in report.business_model.customer_segments %}
+                                <li style="position: relative; padding-left: 1.25rem;"><span style="position: absolute; left: 0; color: var(--primary);">•</span> {{ seg }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: #a78bfa; font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-share-nodes"></i> Channels
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+                            {% for chan in report.business_model.channels %}
+                                <li style="position: relative; padding-left: 1.25rem;"><span style="position: absolute; left: 0; color: #a78bfa;">•</span> {{ chan }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: #fb7185; font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-handshake"></i> Key Partners
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+                            {% for part in report.business_model.key_partners %}
+                                <li style="position: relative; padding-left: 1.25rem;"><span style="position: absolute; left: 0; color: #fb7185;">•</span> {{ part }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: #fca5a5; font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-calculator"></i> Cost Structure
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+                            {% for cost in report.business_model.cost_structure %}
+                                <li style="position: relative; padding-left: 1.25rem;"><span style="position: absolute; left: 0; color: #fca5a5;">•</span> {{ cost }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <h3 style="color: #34d399; font-size: 1.1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                            <i class="fa-solid fa-money-bill-trend-up"></i> Revenue Streams
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+                            {% for stream in report.revenue_model.monetization_options %}
+                                <li style="position: relative; padding-left: 1.25rem;"><span style="position: absolute; left: 0; color: #34d399;">•</span> {{ stream }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 4: Marketing -->
+        <div id="tab-marketing" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-bullhorn"></i> Go-to-Market Strategy</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Acquiring early customers and scaling awareness in the target audience.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-tower-broadcast" style="color: var(--teal);"></i> Targeted Channels
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for chan in report.marketing_plan.channels %}
+                                <li style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 1rem; border-radius: 8px;">
+                                    <i class="fa-solid fa-bullseye" style="color: var(--teal); margin-right: 0.5rem;"></i> {{ chan }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: #ffffff; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-route" style="color: var(--secondary);"></i> Core Tactics
+                        </h3>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for tact in report.marketing_plan.tactics %}
+                                <li style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-glass); padding: 1rem; border-radius: 8px;">
+                                    <i class="fa-solid fa-check-double" style="color: var(--secondary); margin-right: 0.5rem;"></i> {{ tact }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: #ffffff;">
+                        <i class="fa-regular fa-calendar-check" style="color: var(--primary);"></i> Timeline & Action Plan
+                    </h3>
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        {% for step in report.marketing_plan.go_to_market_steps %}
+                            <div style="display: flex; gap: 1rem; align-items: flex-start; padding: 1rem; background: rgba(255, 255, 255, 0.01); border-left: 3px solid var(--primary); border-radius: 0 8px 8px 0;">
+                                <div style="font-weight: bold; color: var(--primary); min-width: 80px; font-family: var(--font-heading);">Step {{ forloop.counter }}</div>
+                                <div style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">{{ step }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 5: Revenue -->
+        <div id="tab-revenue" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-hand-holding-dollar"></i> Monetization & Financial Design</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Viability of startup model and pricing systems.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <div style="color: var(--teal); font-size: 2rem; margin-bottom: 0.75rem;">
+                            <i class="fa-solid fa-tags"></i>
+                        </div>
+                        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Pricing Strategy</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">{{ report.revenue_model.pricing_strategy }}</p>
+                    </div>
+                    
+                    <div class="glass-panel" style="background: rgba(255, 255, 255, 0.02);">
+                        <div style="color: var(--secondary); font-size: 2rem; margin-bottom: 0.75rem;">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                        <h4 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Expected Margins</h4>
+                        <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-muted);">{{ report.revenue_model.estimated_margins }}</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.25rem; margin-bottom: 1rem; color: #ffffff;">Monetization Paths</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                        {% for stream in report.revenue_model.monetization_options %}
+                            <div style="padding: 1.25rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-glass); border-radius: 8px; text-align: center;">
+                                <i class="fa-solid fa-money-bill-1" style="color: var(--teal); font-size: 1.5rem; margin-bottom: 0.75rem; display: block;"></i>
+                                <span style="font-weight: 600; font-size: 0.95rem;">{{ stream }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="glass-panel" style="background: rgba(249, 115, 22, 0.05); border-color: rgba(249, 115, 22, 0.25);">
+                    <h4 style="color: #ffffff; font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fa-solid fa-coins" style="color: #fb923c;"></i> Cost Projections
+                    </h4>
+                    <p style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main);">
+                        {{ report.revenue_model.projected_costs }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 6: Risks -->
+        <div id="tab-risks" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-triangle-exclamation"></i> Risk Matrix & Mitigations</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Anticipating hurdles and creating defensive action systems.</p>
+                
+                {% for risk in report.risks %}
+                    <div class="risk-card">
+                        <div class="risk-info">
+                            <div class="risk-header">
+                                <h3 style="font-size: 1.2rem; color: #ffffff;">{{ risk.risk_name }}</h3>
+                                <span class="impact-badge {% if risk.impact == 'High' %}impact-high{% elif risk.impact == 'Medium' %}impact-medium{% else %}impact-low{% endif %}">
+                                    {{ risk.impact }} Impact
+                                </span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
+                                <strong>Mitigation:</strong> {{ risk.mitigation_strategy }}
+                            </p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="glass-panel" style="text-align: center; color: var(--text-muted);">No risks specified.</div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Tab 7: Improvements Checklist -->
+        <div id="tab-improvements" class="tab-content hidden">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-circle-check"></i> Action Checklist & Improvements</h2>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">Actionable suggestions to iterate on your idea and reduce launch friction.</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for imp in report.improvements %}
+                        <label style="display: flex; gap: 1.25rem; align-items: flex-start; padding: 1.25rem; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); border-radius: 12px; cursor: pointer; transition: var(--transition-smooth);" class="checklist-item">
+                            <input type="checkbox" style="margin-top: 0.25rem; width: 18px; height: 18px; accent-color: var(--teal);">
+                            <div>
+                                <h4 style="font-size: 1.1rem; color: #ffffff; margin-bottom: 0.25rem;">{{ imp.area }}</h4>
+                                <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">{{ imp.suggestion }}</p>
+                            </div>
+                        </label>
+                    {% empty %}
+                        <div class="glass-panel" style="text-align: center; color: var(--text-muted);">No improvements analyzed.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab 8: Investor Pitch Slide Deck -->
+        <div id="tab-pitch" class="tab-content hidden">
+            <div class="glass-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2><i class="fa-solid fa-presentation-screen"></i> Investor Pitch Deck</h2>
+                    <button id="copy-pitch-btn" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-copy"></i> Copy Full Pitch
+                    </button>
+                </div>
+                
+                <!-- Presentation deck container -->
+                <div class="pitch-container">
+                    
+                    <!-- Slide 1: Hook -->
+                    <div class="pitch-slide active" data-slide="0">
+                        <div class="slide-number">Slide 1: THE VISION</div>
+                        <div class="slide-content">
+                            <h3>How we explain the opportunity.</h3>
+                            <p data-pitch="hook">"{{ report.investor_pitch.hook }}"</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 2: Problem -->
+                    <div class="pitch-slide" data-slide="1">
+                        <div class="slide-number">Slide 2: THE PROBLEM</div>
+                        <div class="slide-content">
+                            <h3>The pain point in the market.</h3>
+                            <p data-pitch="problem">"{{ report.investor_pitch.problem }}"</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 3: Solution -->
+                    <div class="pitch-slide" data-slide="2">
+                        <div class="slide-number">Slide 3: THE SOLUTION</div>
+                        <div class="slide-content">
+                            <h3>Our value and software proposition.</h3>
+                            <p data-pitch="solution">"{{ report.investor_pitch.solution }}"</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 4: Market -->
+                    <div class="pitch-slide" data-slide="3">
+                        <div class="slide-number">Slide 4: MARKET SCALE</div>
+                        <div class="slide-content">
+                            <h3>Total Addressable Market size.</h3>
+                            <p data-pitch="market">"{{ report.investor_pitch.market_size }}"</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Slide 5: Ask & Projection -->
+                    <div class="pitch-slide" data-slide="4">
+                        <div class="slide-number">Slide 5: PROJECTION & ASK</div>
+                        <div class="slide-content">
+                            <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">Financial forecast</h3>
+                            <p data-pitch="projections" style="font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--text-muted);">{{ report.investor_pitch.financial_projections }}</p>
+                            
+                            <h3 style="font-size: 1.75rem; margin-bottom: 1rem;">The Funding Ask</h3>
+                            <p data-pitch="ask" style="font-size: 1.15rem; color: #ffffff; font-weight: 500;">{{ report.investor_pitch.the_ask }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Pitch controls -->
+                    <div class="pitch-controls">
+                        <button id="prev-slide" class="btn btn-secondary" style="padding: 0.5rem 1rem;" disabled>
+                            <i class="fa-solid fa-arrow-left-long"></i> Prev
+                        </button>
+                        <div class="pitch-dots" id="pitch-dots"></div>
+                        <button id="next-slide" class="btn btn-secondary" style="padding: 0.5rem 1rem;">
+                            Next <i class="fa-solid fa-arrow-right-long"></i>
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}
