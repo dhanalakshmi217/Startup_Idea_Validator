@@ -56,9 +56,3 @@ streamlit run app.py
 - SWOT Analysis
 - Business Model Canvas
 - Market Size Prediction
-
-## 👩‍💻 Author
-
-**Dhanalakshmi**
-
-GitHub: https://github.com/dhanalakshmi217
