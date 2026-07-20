@@ -30,5 +30,3 @@ Startup Idea Validator is an AI-powered web application that helps entrepreneurs
 - Business Model Canvas
 - Market trend prediction
 
-## 👩‍💻 Author
-**Dhanalakshmi**
