@@ -1,3 +1,4 @@
 django>=5.0,<6.0
 google-generativeai
 python-dotenv
+whitenoise>=6.6,<7.0
